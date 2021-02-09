@@ -306,8 +306,12 @@ class COCOEvaluator(DatasetEvaluator):
             self._logger.warn("No predictions from the model!")
             return {metric: float("nan") for metric in metrics}
         
-        tmp = coco_eval.stats
-        del tmp[1:3]
+        
+        tmp = []
+        for i in range(len(coco_eval.stats)):
+            if i not in [1, 2]:
+                tmp.append(coco_eval.stats[i])
+
         print(metrics)
         print(tmp)
         # the standard metrics
