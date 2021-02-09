@@ -312,9 +312,6 @@ class COCOEvaluator(DatasetEvaluator):
             if i not in [1, 2]:
                 tmp.append(coco_eval.stats[i])
 
-        print(metrics)
-        print(coco_eval.stats)
-        print(tmp)
         # the standard metrics
         results = {
             metric: float(tmp[idx] * 100 if tmp[idx] >= 0 else "nan")
