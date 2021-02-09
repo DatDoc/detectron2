@@ -237,7 +237,7 @@ class COCOEvaluator(DatasetEvaluator):
                 if len(coco_results) > 0
                 else None  # cocoapi does not handle empty results very well
             )
-
+            
             res = self._derive_coco_results(
                 coco_eval, task, class_names=self._metadata.get("thing_classes")
             )
@@ -297,7 +297,7 @@ class COCOEvaluator(DatasetEvaluator):
         """
 
         metrics = {
-            "bbox": ["AP", "AP50", "AP75", "APs", "APm", "APl"],
+            "bbox": ["AP", "AP40", "APs", "APm", "APl"],
             "segm": ["AP", "AP50", "AP75", "APs", "APm", "APl"],
             "keypoints": ["AP", "AP50", "AP75", "APm", "APl"],
         }[iou_type]
@@ -305,7 +305,8 @@ class COCOEvaluator(DatasetEvaluator):
         if coco_eval is None:
             self._logger.warn("No predictions from the model!")
             return {metric: float("nan") for metric in metrics}
-
+        print(metrics)
+        print(coco_eval.stats)
         # the standard metrics
         results = {
             metric: float(coco_eval.stats[idx] * 100 if coco_eval.stats[idx] >= 0 else "nan")
@@ -533,7 +534,6 @@ def _evaluate_predictions_on_coco(
     Evaluate the coco results using COCOEval API.
     """
     assert len(coco_results) > 0
-    print("**************coco_result: ", coco_results)
     print("**************iou_type: ", iou_type)
     if iou_type == "segm":
         coco_results = copy.deepcopy(coco_results)
@@ -545,7 +545,7 @@ def _evaluate_predictions_on_coco(
             c.pop("bbox", None)
 
     coco_dt = coco_gt.loadRes(coco_results)
-    coco_eval = (COCOeval_opt if use_fast_impl else COCOeval)(coco_gt, coco_dt, iou_type)
+    coco_eval =COCOeval(coco_gt, coco_dt, iou_type)
     if img_ids is not None:
         coco_eval.params.imgIds = img_ids
 
@@ -567,12 +567,8 @@ def _evaluate_predictions_on_coco(
             "http://cocodataset.org/#keypoints-eval."
         )
 
-    # coco_eval = COCOeval(cocogt, coco_dt, 'bbox')
-    # coco_eval.params.useCats = True
-    # coco_eval.params.iouType = "bbox"
     coco_eval.params.iouThrs = np.array([0.4])
     coco_eval.evaluate()
     coco_eval.accumulate()
     coco_eval.summarize()
-
     return coco_eval
