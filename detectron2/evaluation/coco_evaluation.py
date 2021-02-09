@@ -306,13 +306,13 @@ class COCOEvaluator(DatasetEvaluator):
             self._logger.warn("No predictions from the model!")
             return {metric: float("nan") for metric in metrics}
         
-        coco_eval.stats.pop(1)
-        coco_eval.stats.pop(2)
+        tmp = coco_eval.stats
+        del tmp[1:3]
         print(metrics)
-        print(coco_eval.stats)
+        print(tmp)
         # the standard metrics
         results = {
-            metric: float(coco_eval.stats[idx] * 100 if coco_eval.stats[idx] >= 0 else "nan")
+            metric: float(tmp[idx] * 100 if tmp[idx] >= 0 else "nan")
             for idx, metric in enumerate(metrics)
         }
         self._logger.info(
@@ -326,6 +326,7 @@ class COCOEvaluator(DatasetEvaluator):
         # Compute per-category AP
         # from https://github.com/facebookresearch/Detectron/blob/a6a835f5b8208c45d0dce217ce9bbda915f44df7/detectron/datasets/json_dataset_evaluator.py#L222-L252 # noqa
         precisions = coco_eval.eval["precision"]
+        print("precisions\n")
         print(precisions)
         # precision has dims (iou, recall, cls, area range, max dets)
         assert len(class_names) == precisions.shape[2]
