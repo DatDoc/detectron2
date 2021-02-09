@@ -45,7 +45,7 @@ class COCOEvaluator(DatasetEvaluator):
         distributed,
         output_dir=None,
         *,
-        use_fast_impl=True,
+        use_fast_impl=False,
         kpt_oks_sigmas=(),
     ):
         """
@@ -527,13 +527,14 @@ def _evaluate_box_proposals(dataset_predictions, coco_api, thresholds=None, area
 
 
 def _evaluate_predictions_on_coco(
-    coco_gt, coco_results, iou_type, kpt_oks_sigmas=None, use_fast_impl=True, img_ids=None
+    coco_gt, coco_results, iou_type, kpt_oks_sigmas=None, use_fast_impl=False, img_ids=None
 ):
     """
     Evaluate the coco results using COCOEval API.
     """
     assert len(coco_results) > 0
-
+    print("**************coco_result: ", coco_results)
+    print("**************iou_type: ", iou_type)
     if iou_type == "segm":
         coco_results = copy.deepcopy(coco_results)
         # When evaluating mask AP, if the results contain bbox, cocoapi will
@@ -566,6 +567,10 @@ def _evaluate_predictions_on_coco(
             "http://cocodataset.org/#keypoints-eval."
         )
 
+    # coco_eval = COCOeval(cocogt, coco_dt, 'bbox')
+    # coco_eval.params.useCats = True
+    # coco_eval.params.iouType = "bbox"
+    coco_eval.params.iouThrs = np.array([0.4])
     coco_eval.evaluate()
     coco_eval.accumulate()
     coco_eval.summarize()
