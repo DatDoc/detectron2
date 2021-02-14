@@ -113,7 +113,7 @@ print("HACKING: overriding COCOeval.summarize = vin_summarize...")
 COCOeval.summarize = vin_summarize
 
 
-class VinbigdataEvaluator(DatasetEvaluator):
+class COCOEvaluator(DatasetEvaluator):
     """
     Evaluate AR for object proposals, AP for instance detection/segmentation, AP
     for keypoint detection outputs using COCO's metrics.
