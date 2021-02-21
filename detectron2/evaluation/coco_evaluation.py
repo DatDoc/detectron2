@@ -387,7 +387,7 @@ class COCOEvaluator(DatasetEvaluator):
         """
 
         metrics = {
-            "bbox": ["AP", "AP50", "AP75", "APs", "APm", "APl"],
+            "bbox": ["AP", "AP50", "AP40", "APs", "APm", "APl"],
             "segm": ["AP", "AP50", "AP75", "APs", "APm", "APl"],
             "keypoints": ["AP", "AP50", "AP75", "APm", "APl"],
         }[iou_type]

@@ -58,6 +58,7 @@ from detectron2.utils.events import (
 logger = logging.getLogger("detectron2")
 
 
+
 def get_evaluator(cfg, dataset_name, output_folder=None):
     """
     Create evaluator(s) for a given dataset.
@@ -154,6 +155,7 @@ def do_train(cfg, model, resume=False):
     # precise BN here, because they are not trivial to implement in a small training loop
     data_loader = build_detection_train_loader(cfg)
     logger.info("Starting training from iteration {}".format(start_iter))
+    best = -1
     with EventStorage(start_iter) as storage:
         for data, iteration in zip(data_loader, range(start_iter, max_iter)):
             storage.iter = iteration
@@ -178,8 +180,13 @@ def do_train(cfg, model, resume=False):
                 and (iteration + 1) % cfg.TEST.EVAL_PERIOD == 0
                 and iteration != max_iter - 1
             ):
-                do_test(cfg, model)
+                a = do_test(cfg, model)
                 # Compared to "train_net.py", the test results are not dumped to EventStorage
+                if a["bbox"]["AP40"] > best:
+                    print("BEST UPDATED: best_so_far={}, new_best={}".format(best, a["bbox"]["AP40"]))
+                    best = a["bbox"]["AP40"]
+                    checkpointer.save("model_best")
+                checkpointer.save("model_final")
                 comm.synchronize()
 
             if iteration - start_iter > 5 and (
