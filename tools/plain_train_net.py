@@ -181,6 +181,9 @@ def do_train(cfg, model, resume=False):
                 and iteration != max_iter - 1
             ):
                 a = do_test(cfg, model)
+                print("###################")
+                print(a)
+                print(a["bbox"]["AP40"])
                 # Compared to "train_net.py", the test results are not dumped to EventStorage
                 if a["bbox"]["AP40"] > best:
                     print("BEST UPDATED: best_so_far={}, new_best={}".format(best, a["bbox"]["AP40"]))
