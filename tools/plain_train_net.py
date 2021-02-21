@@ -158,7 +158,6 @@ def do_train(cfg, model, resume=False):
     best = -1
     with EventStorage(start_iter) as storage:
         for data, iteration in zip(data_loader, range(start_iter, max_iter)):
-            
             storage.iter = iteration
 
             loss_dict = model(data)
@@ -175,18 +174,20 @@ def do_train(cfg, model, resume=False):
             optimizer.step()
             storage.put_scalar("lr", optimizer.param_groups[0]["lr"], smoothing_hint=False)
             scheduler.step()
-            writer.write()
-            if iteration % cfg.TEST.EVAL_PERIOD==0:
-                a = do_test(cfg, model)
-                print("###################")
-                # print(a)
-                # print(a["bbox"]["AP40"])
+    
+            if (
+                cfg.TEST.EVAL_PERIOD > 0
+                and (iteration + 1) % cfg.TEST.EVAL_PERIOD == 0
+                and iteration != max_iter - 1
+            ):
+                do_test(cfg, model)
+                
                 # Compared to "train_net.py", the test results are not dumped to EventStorage
                 if a["bbox"]["AP40"] > best:
                     print("BEST UPDATED: best_so_far={}, new_best={}".format(best, a["bbox"]["AP40"]))
                     best = a["bbox"]["AP40"]
                     checkpointer.save("model_best")
-                checkpointer.save("model_final")
+                checkpointer.save("model_last")
                 comm.synchronize()
 
             if iteration - start_iter > 5 and (
