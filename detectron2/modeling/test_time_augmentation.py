@@ -43,7 +43,6 @@ class DatasetMapperTTA:
         """
         Args:
             dict: a dict in standard model input format. See tutorials for details.
-
         Returns:
             list[dict]:
                 a list of dicts, which contain augmented version of the input image.
@@ -147,7 +146,6 @@ class GeneralizedRCNNWithTTA(nn.Module):
         """
         Execute inference on a list of inputs,
         using batch size = self.batch_size, instead of the length of the list.
-
         Inputs & outputs have the same format as :meth:`GeneralizedRCNN.inference`
         """
         if detected_instances is None:
@@ -178,7 +176,7 @@ class GeneralizedRCNNWithTTA(nn.Module):
             ret = copy.copy(dataset_dict)
             if "image" not in ret:
                 image = read_image(ret.pop("file_name"), self.tta_mapper.image_format)
-                image = torch.from_numpy(image).permute(2, 0, 1)  # CHW
+                image = torch.from_numpy(np.ascontiguousarray(image.transpose(2, 0, 1)))  # CHW
                 ret["image"] = image
             if "height" not in ret and "width" not in ret:
                 ret["height"] = image.shape[1]
@@ -191,7 +189,6 @@ class GeneralizedRCNNWithTTA(nn.Module):
         """
         Args:
             input (dict): one dataset dict with "image" field being a CHW tensor
-
         Returns:
             dict: one output dict
         """
