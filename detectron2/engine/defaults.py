@@ -189,7 +189,7 @@ class DefaultPredictor:
         self.cfg = cfg.clone()  # cfg can be modified by model
         self.tta = tta
         if self.tta == True:
-            self.model = GeneralizedRCNNWithTTA(build_model(self.cfg), cfg)
+            self.model = GeneralizedRCNNWithTTA(build_model(self.cfg), self.cfg)
         else:
             self.model = build_model(self.cfg)
         self.model.eval()
